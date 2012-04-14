@@ -1,0 +1,64 @@
+# general aliases
+#
+
+alias dev3='ssh chaitanya.kuber@dev3.syd1bc.bigcommerce.net'
+
+alias emc='emacsclient -n'
+alias df='df -kh'
+alias cd..='cd ..'
+alias ..='cd ..'
+alias m="more"
+alias quit='exit'
+alias cls='clear'
+alias help='man'
+alias rm="rm -rf"
+alias mcc='make clean clobber'
+alias mc='make clean'
+alias mida='make include depend all'
+alias mda='make depend all'
+alias mid='make include depend'
+alias mi='make include'
+alias mde='make depend'
+alias ma='make all'
+alias db='psql xenostore'
+alias abdb='psql px'
+alias test="cd test"
+alias gterm="gnome-terminal"
+alias bashrc="ecs ~/.bashrc"
+alias path='echo -e ${PATH//:/\\n}'
+
+alias gb='git branch'
+alias gba='git branch -a'
+alias gcav='git commit -av'
+alias gca='git commit -a'
+alias gd='git diff | mate'
+alias gl='git pull origin master'
+alias gp='git push origin master'
+alias gp?='git log --pretty=oneline origin/master..HEAD'
+alias gs='git status'
+alias gpcd='git push origin master && cap deploy'
+alias gpom='git pull origin master'
+alias update_sfcportal='cd vendor/plugins/sfc_portal/ && git remote update && git merge origin/master && cd ../../..'
+alias irb='irb --simple-prompt'
+alias stop_mysql='sudo launchctl unload -w /Library/LaunchDaemons/com.mysql.mysqld.plist'
+alias start_mysql='sudo launchctl load -w /Library/LaunchDaemons/com.mysql.mysqld.plist'
+alias ttr='touch tmp/restart.txt'
+
+alias ls='ls -hF'	# add colors for filetype recognition
+alias la='ls -A'                # show hidden files
+alias lx='ls -lXB'              # sort by extension
+alias lk='ls -lSr'              # sort by size
+alias lc='ls -lcr'		# sort by change time  
+alias lu='ls -lur'		# sort by access time   
+alias lr='ls -lR'               # recursive ls
+alias lt='ls -ltr'              # sort by date
+alias lm='ls -al | more'        # pipe through 'more'
+alias l='ls -lhF --color=tty'
+
+alias xs='cd'
+alias vf='cd'
+alias moer='more'
+alias moew='more'
+alias kk='ll'
+
+

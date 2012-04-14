@@ -1,0 +1,350 @@
+;; dot emacs file for Chaitanya Kuber
+;; works on both xemacs and emacs
+
+(setenv "ESHELL" "/bin/bash")
+(setq load-path (cons "~/lib/emacs/site-lisp/" load-path))
+(setq default-major-mode 'text-mode)
+(add-hook 'text-mode-hook 'turn-on-auto-fill)
+
+;; start emacs server so that I can
+;; open files into the same window
+;;
+(server-start)
+
+;; Load path
+;;
+(setq load-path (cons "~/emacs" load-path))
+
+(require 'tramp)
+(setq tramp-default-method "ssh")
+(setq tramp-default-user "kuber")
+(setq tramp-chunksize 500)
+
+;; ruby mode
+;;
+(autoload 'ruby-mode "ruby-mode" "Major mode to edit ruby files." t)
+(setq auto-mode-alist
+  (append '(("\\.rb$" . ruby-mode)) auto-mode-alist))
+
+;; remove the ludicrous toolbar, scrollbar and menubar
+(tool-bar-mode nil)
+(scroll-bar-mode nil)
+(menu-bar-mode nil)
+
+;; set title for emacs window
+(setq frame-title-format '((buffer-file-name "%F - %b") " ---> (Think Before You Speak!!!)" ))
+
+;; Set up the keyboard so the delete key on both the regular keyboard
+;; and the keypad delete the character under the cursor and to the right
+;; under X, instead of the default, backspace behavior.
+
+(global-set-key [delete] 'delete-region)
+(global-set-key [kp-delete] 'delete-char)
+
+(autoload 'goto-last-change "goto-last-change"
+  "Set point to the position of the last change." t)
+;; 
+;; You may also want to bind a key to `M-x goto-last-change', e.g.
+(global-set-key "\C-x\C-\\" 'goto-last-change)
+
+;; redo shortcut
+(global-set-key [(control -)] 'redo)
+
+;; toggle case stuff
+(global-set-key [(control \`)] 'joc-toggle-case)
+(global-set-key [(control ~)] 'joc-toggle-case-backwards)
+(global-set-key [(control meta \`)] 'joc-toggle-case-by-word)
+(global-set-key [(control meta ~)] 'joc-toggle-case-by-word-backwards)
+
+;; occur
+(global-set-key [(meta o)] `occur)
+
+;; uncomment-region
+(global-set-key "\C-u" 'uncomment-region)
+
+;; switch to other window
+(global-set-key [(control tab)] 'other-window)
+
+;; toggle buffer stuff
+(global-set-key [(meta b)] 'joc-toggle-buffer)
+
+;; load line numbers
+(autoload 'setnu-mode "setnu" "Line number mode" t)
+(global-set-key "\C-z" 'setnu-mode)
+
+;; new c-style
+(setq c-indent-tabs-mode t ; Pressing TAB should cause indentation
+      c-indent-level 4     ; A TAB is equivilent to four spaces
+      c-argdecl-indent 0   ; Do not indent argument decl's extra
+      c-tab-always-indent t
+      backward-delete-function nil) ; do NOT expand tabs when deleting them
+
+ ; If a statement continues on the next line, indent the continuation by 4
+(c-add-style "my-c-style" '((c-continued-statement-offset 4)))
+
+(defun my-c-mode-hook ()
+  (c-set-style "my-c-style")
+  (c-set-offset 'substatement-open '0) ; brackets should be at same indentation level as the statements they open
+  (c-set-offset 'inline-open '+)
+  (c-set-offset 'block-open '+)
+  (c-set-offset 'brace-list-open '+) ; all "opens" should be indented by the c-indent-level
+  (c-set-offset 'case-label '+)) ; indent case labels by c-indent-level, too
+(add-hook 'c-mode-hook 'my-c-mode-hook)
+(add-hook 'c++-mode-hook 'my-c-mode-hook)
+
+;;
+;; Start with new default.
+;;
+(setq mode-line-format default-mode-line-format)
+(setq search-highlight t)
+(setq c-basic-offset 4)
+(setq c-default-style "my-c-style")
+
+;;
+;; Set tab key to reformat region if region is selected in c++-mode
+;;
+(defadvice c-indent-command (around c-smart-indent-region-or-line activate)
+"This piece of advice will make the TAB
+key do its usual thing (indent line), or indent the
+whole region if the mark is set."
+  (if mark-active
+      (c-indent-region (region-beginning) (region-end))
+    ad-do-it))
+
+;;
+;; Default paths for finding include files
+;;
+(setq cc-search-directories
+     '("." "../src"
+       "~/cvs/pub/kr/include"
+       "~/cvs/px/lib/pxcomm/include"
+       "~/cvs/px/lib/pxmedia/include"
+       "~/cvs/px/lib/pxdb/include"
+       "/usr/local/ace/ACE-4.5.3"
+       "/usr/include/*"))
+
+;;
+;; Set up options for compile
+;;
+;;(setq compile-command            "rmakeit"
+(setq compile-command            "make" ;; make it so
+      compilation-read-command   nil	;; Just do it
+      compilation-ask-about-save nil)	;; I SAID, just do it!
+
+(setq compilation-mode-font-lock-keywords
+      '(("^\\(.*Error.*\\)$" 1 font-lock-function-name-face)
+	("^\\(.*Warning.*\\)$" 1 font-lock-reference-face)))
+
+(defun compile-with-prompt (arg)
+  "Invoke compile after prompting for compilation command"
+  (interactive
+   (list (read-from-minibuffer "Compile command: "
+			       compile-command nil nil
+			       '(compile-history . 1))))
+  (compile arg))
+
+;;
+;; kill current buffer without confirmation
+;;
+(global-set-key "\C-xk" 'kill-current-buffer)
+(global-set-key "\M-k" 'kill-current-buffer)
+(defun kill-current-buffer ()
+  "Kill the current buffer, without confirmation."
+  (interactive)
+  (kill-buffer (current-buffer)))
+
+;; time display
+(load "time" t t)
+(display-time)
+
+;;
+;; PRINTING COMMANDS
+;;
+(autoload 'a2ps-print "a2ps-print" "a2ps print" t)
+(setq ps-landscape-mode 1)
+(setq ps-number-of-columns 2)
+(setq ps-print-color-p  nil)
+(setq ps-lpr-command "lpr")
+
+;;
+;; MODES
+;;
+(fset 'c-mode 'c++-mode)
+(setq font-lock-maximum-decoration '((c-mode . 3) (c++-mode . 3)))
+(setq auto-mode-alist (cons '("\\.js$" . js-mode) auto-mode-alist))
+(setq auto-mode-alist (cons '("\\.htmls$" . html-mode) auto-mode-alist))
+(setq auto-mode-alist (cons '("\\.CXX$" . c++-mode) auto-mode-alist))
+(setq auto-mode-alist (cons '("\\.C$" . c++-mode) auto-mode-alist))
+(setq auto-mode-alist (cons '("\\.h$" . c++-mode) auto-mode-alist))
+(setq auto-mode-alist (cons '("\\.java$" . java-mode) auto-mode-alist))
+(setq auto-mode-alist (cons '("\\.ros$" . php-mode) auto-mode-alist))
+
+;;
+;; little macro for date stamping (stolen from alainp)
+;;
+(defun insert-current-date()
+  "Insert a line containing the current date and user name at point."
+  (interactive)
+  (insert
+   (concat(current-time-string) "      ")))
+(global-set-key "\C-c\C-d" 'insert-current-date)
+
+;;
+;; ASSORTED CUSTOMISATION
+;;
+(recentf-mode 1)
+
+;; Make the sequence "C-x w" execute the `what-line' command,
+;; which prints the current line number in the echo area.
+(global-set-key "\C-xw" 'what-line)
+
+;; set up the function keys to do common tasks to reduce Emacs pinky
+;; and such.
+
+;; Make F1 invoke compile
+(global-set-key [f1] 'query-replace-regexp)
+(global-set-key [kp-add]       'compile-with-prompt)
+
+;; Make F7 be `save-buffer'
+(global-set-key [f2] 'save-buffer)
+
+;; Make F2 be `undo'
+(global-set-key [f3] 'undo)
+
+;; Make F4 be "mark", F5 be "copy", F6 be "paste"
+;; Note that you can set a key sequence either to a command or to another
+;; key sequence.
+(global-set-key [f4] 'set-mark-command)
+(global-set-key [f5] "\M-w")
+(global-set-key [f6] 'ff-find-other-file)
+
+;; Shift-F4 is "pop mark off of stack"
+(global-set-key [(shift f4)] (lambda () (interactive) (set-mark-command t)))
+
+(global-set-key [f7] 'find-file)
+
+(global-set-key [f8] 'shell)
+
+;;
+;; MORE CUSTOMISATION
+;;
+(setq
+ find-file-existing-other-name t
+ find-file-visit-truename t
+)
+
+(setq kill-whole-line t)
+(define-key global-map "\M-g" 'goto-line)
+
+(defun scroll-up-1 (arg)
+  "Scroll up one line."
+  (interactive "P")
+  (scroll-up 1))
+
+(global-set-key [S-down]   'scroll-up-1)
+
+(defun scroll-down-1 (arg)
+  "Scroll down one line."
+  (interactive "P")
+  (scroll-down 1))
+
+(global-set-key [S-up]     'scroll-down-1)
+
+(defun scroll-other-up-1 (arg)
+  "Scroll up one line."
+  (interactive "P")
+  (scroll-other-window -1))
+
+(global-set-key [M-up]   'scroll-other-up-1)
+
+(defun scroll-other-down-1 (arg)
+  "Scroll down one line."
+  (interactive "P")
+  (scroll-other-window 1))
+
+(global-set-key [M-down]     'scroll-other-down-1)
+
+(defun scroll-right-1 (arg)
+  "Scroll right one character."
+  (interactive "P")
+  (scroll-right 1))
+
+(global-set-key [S-left]    'scroll-right-1)
+
+(defun scroll-left-1 (arg)
+  "Scroll left one character."
+  (interactive "P")
+  (scroll-left 1))
+
+(global-set-key [S-right]    'scroll-left-1)
+
+;; Installation
+(autoload 'html-helper-mode "html-helper-mode" "Yay HTML" t)
+(setq auto-mode-alist (cons '("\\.html$" . html-helper-mode) auto-mode-alist))
+(setq auto-mode-alist (cons '("\\.asp$" . html-helper-mode) auto-mode-alist))
+(setq auto-mode-alist (cons '("\\.phtml$" . html-helper-mode) auto-mode-alist))
+
+;; php mode
+(add-hook 'php-mode-user-hook 'turn-on-font-lock)
+
+;; save desktop session
+(desktop-load-default)
+(setq history-length 250)
+(add-to-list 'desktop-globals-to-save 'file-name-history)
+(desktop-read)
+
+;; Turn on column line numbers in status bar
+(set-variable 'column-number-mode 't)
+
+(setq imenu-sort-function 'imenu--sort-by-name)
+(add-hook 'c-mode-hook 'imenu-add-menubar-index)
+(add-hook 'c++-mode-hook 'imenu-add-menubar-index)
+(add-hook 'java-mode-hook 'imenu-add-menubar-index)
+(global-set-key [S-mouse-3] 'imenu)
+
+;; Turn on scrolling with wheel mouse
+(mouse-wheel-mode t)
+
+;; annoying bell
+;; To get a visual signal
+(setq visible-bell 1)
+
+;; Now some people find the flashing annoying. 
+;; To turn the alarm totally off
+;; (setq ring-bell-function 'ignore)
+
+;; To get a warning, when something went not as expected, 
+;; can be quite useful sometimes. The following reduces the 
+;; amount of warning signals but does not turn them 
+;; off in general
+
+(setq ring-bell-function 
+      (lambda ()
+ 	(unless (memq this-command
+ 		      '(isearch-abort abort-recursive-edit exit-minibuffer keyboard-quit))
+ 	  (ding)))
+)
+
+(set-background-color "black")
+(set-foreground-color "gray90")
+(setq make-backup-files nil)
+
+(custom-set-variables
+  ;; custom-set-variables was added by Custom.
+  ;; If you edit it by hand, you could mess it up, so be careful.
+  ;; Your init file should contain only one such instance.
+  ;; If there is more than one, they won't work right.
+ '(column-number-mode t)
+ '(cua-mode t nil (cua-base))
+ '(display-battery-mode t)
+ '(save-place t nil (saveplace))
+ '(show-paren-mode t)
+ '(text-mode-hook (quote (turn-on-auto-fill text-mode-hook-identify)))
+ '(transient-mark-mode t)
+ '(uniquify-buffer-name-style (quote forward) nil (uniquify)))
+(custom-set-faces
+  ;; custom-set-faces was added by Custom.
+  ;; If you edit it by hand, you could mess it up, so be careful.
+  ;; Your init file should contain only one such instance.
+  ;; If there is more than one, they won't work right.
+ )
