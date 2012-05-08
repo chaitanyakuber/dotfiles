@@ -112,18 +112,6 @@ whole region if the mark is set."
     ad-do-it))
 
 ;;
-;; Default paths for finding include files
-;;
-(setq cc-search-directories
-     '("." "../src"
-       "~/cvs/pub/kr/include"
-       "~/cvs/px/lib/pxcomm/include"
-       "~/cvs/px/lib/pxmedia/include"
-       "~/cvs/px/lib/pxdb/include"
-       "/usr/local/ace/ACE-4.5.3"
-       "/usr/include/*"))
-
-;;
 ;; Set up options for compile
 ;;
 ;;(setq compile-command            "rmakeit"
